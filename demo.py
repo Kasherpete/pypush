@@ -111,7 +111,7 @@ async def main(args: argparse.Namespace):
                     phone_number, phone_sig = sms_registration.parse_pdu(args.pdu, None)
                 else:
                     import sms_registration
-                    phone_number, phone_sig = sms_registration.register(conn.credentials.token, args.trigger_pdu)
+                    phone_number, phone_sig = sms_registration.register(push_token=conn.credentials.token, no_parse=args.trigger_pdu, gateway=args.gateway)
                     CONFIG["phone"] = {
                         "number": phone_number,
                         "sig": b64encode(phone_sig).decode(),

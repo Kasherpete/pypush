@@ -10,7 +10,6 @@ urllib3.disable_warnings()
 
 PHONE_IP = "192.168.5.120"
 API_PORT = 8080
-GATEWAY = "22223333"
 
 def register(push_token: bytes, no_parse = False, gateway = None) -> tuple[str, bytes]:
     """Forwards a registration request to the phone and returns the phone number, signature for the provided push token"""
