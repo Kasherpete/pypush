@@ -14,8 +14,7 @@ if tlslite.__version__ != "0.8.0-alpha43":
     logger.warning("tlslite-ng is not the correct version!")
     logger.warning("Please install tlslite-ng==0.8.0a43 or you will experience issues!")
 
-import albert
-import bags
+from . import albert, bags
 
 #COURIER_HOST = "windows.courier.push.apple.com"  # TODO: Get this from config
 # Pick a random courier server from 01 to APNSCourierHostcount

@@ -1,6 +1,6 @@
 from base64 import b64encode
 
-import apns
+from utils import apns
 
 from . import _helpers, identity, profile, query
 
@@ -8,10 +8,10 @@ from . import _helpers, identity, profile, query
 class IDSUser:
     # Sets self.user_id and self._auth_token
     def _authenticate_for_token(
-        self, username: str, password: str, factor_callback: callable = None
+        self, username: str, password: str, factor_callback: callable = None, kasher=None
     ):
         self.user_id, self._auth_token = profile.get_auth_token(
-            username, password, factor_callback
+            username, password, factor_callback, kasher=kasher
         )
 
     # Sets self._auth_keypair using self.user_id and self._auth_token
@@ -35,9 +35,9 @@ class IDSUser:
 
     # Authenticates with a username and password, to create a brand new authentication keypair
     def authenticate(
-        self, username: str, password: str, factor_callback: callable = None
+        self, username: str, password: str, kasher, factor_callback: callable = None
     ):
-        self._authenticate_for_token(username, password, factor_callback)
+        self._authenticate_for_token(username, password, factor_callback, kasher=kasher)
         self._authenticate_for_cert()
         self.handles = profile.get_handles(
             b64encode(self.push_connection.token),

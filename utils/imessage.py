@@ -20,8 +20,7 @@ from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
 from xml.etree import ElementTree
 
-import apns
-import ids
+from . import apns, ids
 
 logger = logging.getLogger("imessage")
 

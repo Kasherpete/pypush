@@ -10,9 +10,7 @@ from getpass import getpass
 
 from rich.logging import RichHandler
 
-import apns
-import ids
-import imessage
+from utils import apns, ids, imessage
 
 logging.basicConfig(
     level=logging.NOTSET, format="%(message)s", datefmt="[%X]", handlers=[RichHandler()]

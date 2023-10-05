@@ -10,7 +10,7 @@ from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
 from cryptography.x509.oid import NameOID
 
-import bags
+from utils import bags
 
 from . import signing
 from ._helpers import PROTOCOL_VERSION, USER_AGENT, KeyPair
@@ -46,7 +46,7 @@ def _auth_token_request(username: str, password: str) -> any:
 # If factor_gen is not None, it will be called to get the 2FA code, otherwise it will be prompted
 # Returns (realm user id, auth token)
 def get_auth_token(
-    username: str, password: str, factor_gen: callable = None
+    username: str, password: str, factor_gen: callable = None, kasher=None
 ) -> tuple[str, str]:
     from sys import platform
     
@@ -54,9 +54,11 @@ def get_auth_token(
     if result["status"] != 0:
         if result["status"] == 5000:
             if factor_gen is None:
-                password = password + input("Enter 2FA code: ")
+                password = password + str(kasher(required=True))
+
             else:
                 password = password + factor_gen()
+                kasher(required=False)
             result = _auth_token_request(username, password)
             if result["status"] != 0:
                 raise Exception(f"Error: {result}")

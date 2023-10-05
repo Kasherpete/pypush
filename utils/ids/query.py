@@ -3,8 +3,7 @@ import plistlib
 import random
 from base64 import b64encode
 
-import apns
-import bags
+from utils import apns, bags
 
 from ._helpers import KeyPair, PROTOCOL_VERSION
 from . import signing
