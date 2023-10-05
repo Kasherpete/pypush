@@ -22,6 +22,10 @@ def register(push_token: bytes, no_parse, gateway: str | None, phone_ip: str) ->
             print('\033[91m', 'ERROR: Could not connect to device! Please open the Pypush SMS Helper App.', '\033[0m')
             exit(-1)
 
+        except Exception as e:
+            print('\033[91m', f'ERROR: An unknown error occurred: {e}', '\033[0m')
+            exit(-1)
+
         print("MCC+MNC received! " + mccmnc)
         print("Determining gateway...")
         gateway = gateway_fetch.getGatewayMCCMNC(mccmnc)
@@ -35,7 +39,22 @@ def register(push_token: bytes, no_parse, gateway: str | None, phone_ip: str) ->
     req_id = random.randint(0, 2**32)
     sms = f"REG-REQ?v=3;t={token};r={req_id};"
     print("Sending message and waiting for response...")
-    r = requests.get(f"http://{phone_ip}:{API_PORT}/register", params={"sms": sms, "gateway": gateway}, timeout=30)
+    try:
+        r = requests.get(f"http://{phone_ip}:{API_PORT}/register", params={"sms": sms, "gateway": gateway}, timeout=30)
+    except Exception as e:
+        print('\033[91m', f'ERROR: An unknown error occurred: {e}', '\033[0m')
+        exit(-1)
+
+    if 'error:' in r.text.lower():
+        print('\033[91m', f'ERROR: An error was thrown from PNRgateway Client: {r.text}', '\033[0m')
+
+        # POSSIBLE ERROR FROM APP:
+
+        # Error: timeout waiting for response from gateway (unlikely, timeout is implemented here too)
+        # Error sending SMS
+        # Error: sms parameter not found
+        # Error: gateway parameter not found
+
     print('\033[92m', "Received response from device!", '\033[0m')
     if no_parse:
         print("Now do the next part and rerun with --pdu")
