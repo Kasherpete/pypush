@@ -1,38 +1,34 @@
-# pypush
-`pypush` is a POC demo of my recent iMessage reverse-engineering.
-It can currently register as a new device on an Apple ID, set up encryption keys, and ***send and receive iMessages***!
+# Overview
+This branch is a fork of the [original Pypush](https://github.com/beeper/pypush), but this one is optimized to be used
+within code and to be used programmatically, unlike the original, which has a minimal CLI.
 
-`pypush` is completely platform-independent, and does not require a Mac or other Apple device to use!
+***NOTE:*** This is under development, an actual readme may not be available for a while. Imports will also be changing
+drastically. Here is a simple code sample:
 
-## Installation
-It's pretty self explanatory:
-1. `git clone https://github.com/JJTech0130/pypush`
-2. `pip3 install -r requirements.txt`
-3. `python3 ./demo.py`
+### Login 1 (preferred)
+```python
+client = Client()
+client.load_config_file('config.json')  # you can load a config file, or supply a dict when the obj is first init.
+client.send_message('1234567890', 'pypush test')  # supports effects and handles
+```
 
-## Troubleshooting
-If you have any issues, please join [the Discord](https://discord.gg/BVvNukmfTC) and ask for help.
+### Login 2
+```python
+client = Client()
+client.login('username', 'password')  # auth code will be sent on this line.
+auth_code = input('auth: ')
 
-## Operation
-`pypush` will generate a `config.json` in the repository when you run demo.py. DO NOT SHARE THIS FILE.
-It contains all the encryption keys necessary to log into you Apple ID and send iMessages as you.
+client.authenticate(auth_code)
+client.send_message('1234567890', 'pypush test')
+```
 
-Once it loads, it should prompt you with `>>`. Type `help` and press enter for a list of supported commands.
+### Demo
+```python
+client = Client()
+client.load_config_file('config.json')
 
-## Special Notes
-### Unicorn dependency
-`pypush` currently uses the Unicorn CPU emulator and a custom MachO loader to load a framework from an old version of macOS,
-in order to call some obfuscated functions.
-
-This is only necessary during initial registration, so theoretically you can register on one device, and then copy the `config.json`
-to another device that doesn't support the Unicorn emulator. Or you could switch out the emulator for another x86 emulator if you really wanted to.
-
-### Public key caching
-iMessage will cache public keys. If you get decryption errors in pypush or can only send and not receive messages from another device,
-try logging out and back into iMessage on that device, forcing it to refresh it's key cache. Alternatively, you can wait and the cache should
-expire eventually.
-
-## Licensing
-This project is licensed under the terms of the [SSPL](https://www.mongodb.com/licensing/server-side-public-license). Portions of this project are based on [macholibre by Aaron Stephens](https://github.com/aaronst/macholibre/blob/master/LICENSE) under the Apache 2.0 license.
-
-If you would like to use all or portions of this project in a commercial produce (without releasing source code), we are open to contacts about possible dual-licensing terms.
+client.get_handles()  # returns current handle and all handles
+client.set_handle('number')  # will raise error if incorrect handle supplied
+client.get_incoming_message()  # returns msg object and info within a dict
+client.send_message('to', 'content')  # to param can be str or list. supports effects
+```

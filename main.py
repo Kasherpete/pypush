@@ -154,7 +154,7 @@ class Client:
 
         return self.im.receive()
 
-    def get_handle(self):
+    def get_handles(self):
 
         return {'current': self.user.current_handle, 'all': self.user.handles}
 
@@ -201,8 +201,3 @@ class Client:
         if update:
             open(filepath, 'w').write(json.dumps(self.config))
 
-
-client = Client()
-client.load_config_file('config.json')
-client.authenticate(input('auth: '))
-client.send_message('1234567890', 'pypush test')
