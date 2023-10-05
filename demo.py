@@ -99,10 +99,10 @@ async def main(args: argparse.Namespace):
             print("Would you like to register a phone number? (y/n)")
             if input("> ").lower() == "y":
                 import sms_registration
-                if args.gateway is not None:
-                    sms_registration.GATEWAY = args.gateway
-                if args.phone is not None:
-                    sms_registration.PHONE_IP = args.phone
+
+                if args.phone is None:
+                    print('\033[91m', 'ERROR: You did not supply an IP.', '\033[0m')
+                    exit(-1)
 
                 if "phone" in CONFIG:
                     phone_sig = b64decode(CONFIG["phone"].get("sig"))
@@ -111,7 +111,7 @@ async def main(args: argparse.Namespace):
                     phone_number, phone_sig = sms_registration.parse_pdu(args.pdu, None)
                 else:
                     import sms_registration
-                    phone_number, phone_sig = sms_registration.register(push_token=conn.credentials.token, no_parse=args.trigger_pdu, gateway=args.gateway)
+                    phone_number, phone_sig = sms_registration.register(push_token=conn.credentials.token, no_parse=args.trigger_pdu, gateway=args.gateway, phone_ip=args.phone)
                     CONFIG["phone"] = {
                         "number": phone_number,
                         "sig": b64encode(phone_sig).decode(),
@@ -144,9 +144,9 @@ async def main(args: argparse.Namespace):
 
         if args.reregister:
             print("Re-registering...")
-            users = register(conn, users)
+            register(conn, users)
 
-        print(f"Done?")
+        print('\033[92m', "Done!", '\033[0m')
 
         if args.alive:
             logging.getLogger("apns").setLevel(logging.DEBUG)
