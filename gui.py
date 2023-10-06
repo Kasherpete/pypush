@@ -1,7 +1,30 @@
+import time
+import logging
 import npyscreen
 import os
 from utils import utils
 import main
+import sys
+from rich.logging import RichHandler
+
+logging.basicConfig(
+    level=logging.NOTSET, format="%(message)s", datefmt="[%X]", handlers=[RichHandler()]
+)
+
+
+
+logging.getLogger("urllib3").setLevel(logging.FATAL)
+logging.getLogger("py.warnings").setLevel(logging.FATAL) # Ignore warnings from urllib3
+logging.getLogger("asyncio").setLevel(logging.FATAL)
+logging.getLogger("jelly").setLevel(logging.FATAL)
+logging.getLogger("nac").setLevel(logging.FATAL)
+logging.getLogger("apns").setLevel(logging.FATAL)
+logging.getLogger("albert").setLevel(logging.FATAL)
+logging.getLogger("ids").setLevel(logging.FATAL)
+logging.getLogger("bags").setLevel(logging.FATAL)
+logging.getLogger("imessage").setLevel(logging.FATAL)
+
+logging.captureWarnings(True)
 
 
 class MainForm(npyscreen.FormBaseNew):
@@ -11,15 +34,20 @@ class MainForm(npyscreen.FormBaseNew):
 
         # self.how_exited_handers[npyscreen.wgwidget.EXITED_ESCAPE] = self.exit_application
 
+        if os.path.exists('config.json'):
+            values = ["1. Load from config", "2. Login manually"]
+        else:
+            values = ["1. Login manually"]
+
         self.option = self.add(utils.TitleSelectOne, max_height=4, name="Select method",
-                   values=["1. Load from config", "2. Login manually"], scroll_exit=True, kasher=self.option_selected)
+                   values=values, scroll_exit=True, kasher=self.option_selected)
 
     def option_selected(self):
 
         if "Login manually" in self.option.get_selected_objects()[0]:
             self.parentApp.switchForm("CredsForm")
         else:
-
+            client.load_config_file('config.json')
             self.parentApp.switchForm("mainForm")
 
 
@@ -35,6 +63,10 @@ class CredsForm(npyscreen.ActionFormMinimal):
         password = utils.password_legit(self.password.value)
 
         if username and password:
+            try:
+                client.login(str(self.username.value), str(self.password.value))
+            except KeyError:
+
             self.parentApp.switchForm("authForm")
         elif username and not password:
             npyscreen.notify_wait("Please enter a valid password.", title="Invalid Input")
@@ -54,12 +86,16 @@ class AuthForm(npyscreen.ActionFormMinimal):
         username = self.username.value
 
         if len(username) == 6:
+            print(username)
+            time.sleep(3)
+            client.authenticate(username)
             self.parentApp.switchForm("mainForm")
         else:
             r = npyscreen.notify_yes_no("You did not enter an auth code with 6 digits.\n\nDo you still want to use it?", title="Invalid Input")
             if not r:
                 return
             else:
+                client.authenticate(username)
                 self.parentApp.switchForm("mainForm")
 
 

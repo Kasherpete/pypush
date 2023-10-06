@@ -6,10 +6,10 @@ import logging
 logger = logging.getLogger("nac")
 
 BINARY_HASH = "e1181ccad82e6629d52c6a006645ad87ee59bd13"
-BINARY_PATH = "emulated/IMDAppleServices"
+BINARY_PATH = "utils/emulated/IMDAppleServices"
 BINARY_URL = "https://github.com/JJTech0130/nacserver/raw/main/IMDAppleServices"
 
-FAKE_DATA = plistlib.load(open("emulated/data.plist", "rb"))
+FAKE_DATA = plistlib.load(open("utils/emulated/data.plist", "rb"))
 
 def load_binary() -> bytes:
     # Open the file at BINARY_PATH, check the hash, and return the binary

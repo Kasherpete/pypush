@@ -89,6 +89,7 @@ class Client:
         self.user = ids.IDSUser(self.conn)
 
     def login(self, username: str, password: str):
+        """Returns KeyError if login is incorrect"""
 
         if not self.logged_in:
             self.username = username
