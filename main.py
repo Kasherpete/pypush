@@ -7,6 +7,26 @@ from base64 import b64decode, b64encode
 from utils import apns, ids, imessage
 
 
+def log(content: str, color: str, exit_: bool = False):
+
+    colors = {
+        'BLUE': '\033[94m',
+        'CYAN': '\033[96m',
+        'GREEN': '\033[92m',
+        'YELLOW': '\033[93m',
+        'RED': '\033[91m',
+        'HEADER': '\033[95m',
+        'BOLD': '\033[1m',
+        'UNDERLINE': '\033[4m',
+        'END': '\033[0m',
+    }
+
+    print(colors[color.upper()], content, colors['END'])
+
+    if exit_:
+        exit(-1)
+
+
 def safe_b64decode(s):
     try:
         return b64decode(s)
@@ -71,19 +91,18 @@ class Client:
     def login(self, username: str, password: str):
 
         if not self.logged_in:
-
             self.username = username
             self.password = password
 
             self._apns_connect()
             self.auth_code = None
 
-            threading.Thread(target=self.user.authenticate, args=(self.username, self.password, self._retrieve_auth_code), daemon=True).start()
+            threading.Thread(target=self.user.authenticate,
+                             args=(self.username, self.password, self._retrieve_auth_code), daemon=True).start()
 
     def _retrieve_auth_code(self, required: bool):
 
         if required:
-            print('waiting...')
 
             while True:
                 if self.auth_code is not None:
@@ -103,8 +122,7 @@ class Client:
         try:
             self._apns_validate()
         except:
-            print('NEED AUTH CODE!')
-            exit(-1)
+            raise Exception('You need to supply an auth code!')
 
     def _apns_validate(self):
 
@@ -163,7 +181,7 @@ class Client:
         if handle in self.user.handles:
             self.user.current_handle = fixup_handle(handle)
         else:
-            print(f'Handle "{handle}" not found!')
+            raise Exception(f'Handle "{handle}" not found!')
 
     def send_message(self, to, content, sender=None, effect=None):
 
@@ -175,7 +193,9 @@ class Client:
 
         to = [fixup_handle(h) for h in to]
 
-        print(to)
+        for number in to:
+            if number is None:
+                log('You tried to send a message to an invalid number!', 'red', True)
 
         self.im.send(imessage.iMessage(
             text=content,

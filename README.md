@@ -32,3 +32,7 @@ client.set_handle('number')  # will raise error if incorrect handle supplied
 client.get_incoming_message()  # returns msg object and info within a dict
 client.send_message('to', 'content')  # to param can be str or list. supports effects
 ```
+
+# Changelog
+
+- ***v0.1.3*** - Add error handling, bug fix
