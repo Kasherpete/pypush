@@ -8,7 +8,8 @@ from base64 import b64decode, b64encode
 
 import urllib3
 urllib3.disable_warnings()
-
+import logging
+logger = logging.getLogger("sms_registration")
 API_PORT = 8080
 
 def register(push_token: bytes, no_parse, gateway: str | None, phone_ip: str) -> tuple[str, bytes]:
@@ -19,12 +20,12 @@ def register(push_token: bytes, no_parse, gateway: str | None, phone_ip: str) ->
         try:
             mccmnc = requests.get(f"http://{phone_ip}:{API_PORT}/info", timeout=30).text
         except ConnectionError:
-            print('\033[91m', 'ERROR: Could not connect to device! Please open the Pypush SMS Helper App.', '\033[0m')
-            exit(-1)
+            logger.error('\033[91m', 'ERROR: Could not connect to device! Please open the Pypush SMS Helper App.', '\033[0m')
+            raise
 
         except Exception as e:
-            print('\033[91m', f'ERROR: An unknown error occurred: {e}', '\033[0m')
-            exit(-1)
+            logger.error('\033[91m', f'ERROR: An unknown error occurred: {e}', '\033[0m')
+            raise
 
         print("MCC+MNC received! " + mccmnc)
         print("Determining gateway...")
@@ -32,7 +33,7 @@ def register(push_token: bytes, no_parse, gateway: str | None, phone_ip: str) ->
     if gateway is not None:
         print("Gateway found!  " + str(gateway))
     else:
-        print('\033[91m', "ERROR: No gateway was provided, and automatic gateway detection failed. Please run again with the --gateway flag.", '\033[0m')
+        logger.error("ERROR: No gateway was provided, and automatic gateway detection failed. Please run again with the --gateway flag.")
         # gateway = GATEWAY
         raise
     token = push_token.hex().upper()
@@ -42,11 +43,12 @@ def register(push_token: bytes, no_parse, gateway: str | None, phone_ip: str) ->
     try:
         r = requests.get(f"http://{phone_ip}:{API_PORT}/register", params={"sms": sms, "gateway": gateway}, timeout=30)
     except Exception as e:
-        print('\033[91m', f'ERROR: An unknown error occurred: {e}', '\033[0m')
-        exit(-1)
+        logger.error(f'An unknown error occurred: {e}')
+        raise
 
     if 'error:' in r.text.lower():
-        print('\033[91m', f'ERROR: An error was thrown from PNRgateway Client: {r.text}', '\033[0m')
+        logger.error(f'An error was thrown from PNRgateway Client: {r.text}')
+        raise
 
         # POSSIBLE ERROR FROM APP:
 
@@ -55,7 +57,7 @@ def register(push_token: bytes, no_parse, gateway: str | None, phone_ip: str) ->
         # Error: sms parameter not found
         # Error: gateway parameter not found
 
-    print('\033[92m', "Received response from device!", '\033[0m')
+    logger.info("Received response from device!")
     if no_parse:
         print("Now do the next part and rerun with --pdu")
         exit()

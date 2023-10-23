@@ -101,8 +101,8 @@ async def main(args: argparse.Namespace):
                 import sms_registration
 
                 if args.phone is None:
-                    print('\033[91m', 'ERROR: You did not supply an IP.', '\033[0m')
-                    exit(-1)
+                    logging.error('You did not supply an IP.')
+                    raise Exception("IP address not specified")
 
                 if "phone" in CONFIG:
                     phone_sig = b64decode(CONFIG["phone"].get("sig"))
@@ -146,7 +146,7 @@ async def main(args: argparse.Namespace):
             print("Re-registering...")
             register(conn, users)
 
-        print('\033[92m', "Done!", '\033[0m')
+        logging.info("Done!")
 
         if args.alive:
             logging.getLogger("apns").setLevel(logging.DEBUG)
